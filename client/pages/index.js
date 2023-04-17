@@ -5,17 +5,17 @@ import { io } from "socket.io-client";
 const socket = io.connect("http://localhost:5000");
 
 export default function Home() {
-  const [message, setMessage] = useState();
-  const [receiveMessage, setReceivedMessage] = useState();
-
+  const [message, setMessage] = useState("");
+  const [chat, setChat] = useState([{ pesan: "" }]);
   useEffect(() => {
-    socket.on("receive_message", (d) => {
-      setReceivedMessage(d.message);
+    socket.on("receive_message", (messages) => {
+      setChat((chats) => [...chats, { pesan: messages }]);
     });
   }, [socket]);
 
   const sendMessage = () => {
-    socket.emit("send-message", { message });
+    socket.emit("send-message", message);
+    setMessage("");
   };
 
   return (
@@ -26,7 +26,9 @@ export default function Home() {
         onChange={(e) => setMessage(e.target.value)}
       ></input>
       <button onClick={sendMessage}>Send Message</button>
-      <div>{receiveMessage}</div>
+      {chat.map((d, i) => {
+        return <div key={i}>{d.pesan}</div>;
+      })}
     </div>
   );
 }
